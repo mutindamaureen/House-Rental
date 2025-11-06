@@ -14,6 +14,77 @@ use Illuminate\Support\Facades\Mail;
 class AdminController extends Controller
 {
 
+
+    public function index()
+    {
+        // Get counts
+        $totalUsers = User::count();
+        $totalLandlords = Landlord::count();
+        $totalTenants = Tenant::count();
+        $totalHouses = House::count();
+        $availableHouses = House::where('status', 'available')->count();
+        $occupiedHouses = House::where('status', 'occupied')->count();
+        $totalCategories = Category::count();
+
+        // Get monthly data for charts (current year)
+        $monthlyTenants = Tenant::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->pluck('count', 'month')
+            ->toArray();
+
+        $monthlyHouses = House::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->pluck('count', 'month')
+            ->toArray();
+
+        // ✅ Fix: pad months (1–12) so missing months show as 0
+        $tenantData = array_replace(array_fill(1, 12, 0), $monthlyTenants);
+        $houseData = array_replace(array_fill(1, 12, 0), $monthlyHouses);
+
+        $housesByCategory = House::selectRaw('category, SUM(quantity) as count')
+            ->groupBy('category')
+            ->pluck('count', 'category')
+            ->toArray();
+
+        // Get recent tenants
+        $recentTenants = Tenant::with('user', 'house')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Get top landlords by number of houses
+        $topLandlords = Landlord::withCount('houses')
+            ->with('user')
+            ->orderBy('houses_count', 'desc')
+            ->take(6)
+            ->get();
+
+        // Totals
+        $totalRevenue = Tenant::sum('rent');
+        $totalUtilities = Tenant::sum('utilities');
+        $totalDeposits = Tenant::sum('security_deposit');
+
+        return view('admin.body', compact(
+            'totalUsers',
+            'totalLandlords',
+            'totalTenants',
+            'totalHouses',
+            'availableHouses',
+            'occupiedHouses',
+            'totalCategories',
+            'tenantData',   // ✅ use these instead of monthlyTenants
+            'houseData',    // ✅ use these instead of monthlyHouses
+            'housesByCategory',
+            'recentTenants',
+            'topLandlords',
+            'totalRevenue',
+            'totalUtilities',
+            'totalDeposits'
+        ));
+    }
+
     // Category
     public function view_category(){
         $data = Category::all();

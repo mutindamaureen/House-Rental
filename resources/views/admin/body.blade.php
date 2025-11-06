@@ -1,383 +1,263 @@
-            <h2 class="h5 no-margin-bottom">Dashboard</h2>
-          </div>
+
+<!DOCTYPE html>
+<html>
+<head>
+    @include('admin.css')
+    <style>
+        /* Dashboard Color Accents */
+        .dashtext-1 { color: #198754; }
+        .dashtext-2 { color: #0d6efd; }
+        .dashtext-3 { color: #ffc107; }
+        .dashtext-4 { color: #6f42c1; }
+
+        .dashbg-1 { background-color: #198754; }
+        .dashbg-2 { background-color: #0d6efd; }
+        .dashbg-3 { background-color: #ffc107; }
+        .dashbg-4 { background-color: #6f42c1; }
+
+        /* Card Enhancements */
+        .card {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+        }
+        .number {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .statistic-block {
+            background: #fff;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .statistic-block:hover {
+            transform: translateY(-4px);
+        }
+        .title strong {
+            font-size: 1rem;
+            color: #333;
+        }
+        footer.footer {
+            background: #f8f9fa;
+            padding: 1rem 0;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+        }
+        h2.h5.no-margin-bottom {
+            color: #0d6efd;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+@include('admin.header')
+
+<div class="d-flex align-items-stretch">
+    @include('admin.sidebar')
+
+    <div class="page-content">
+        <div class="page-header bg-light py-3 mb-4 shadow-sm">
+            <div class="container-fluid">
+                <h2 class="h5 no-margin-bottom">Dashboard Overview</h2>
+            </div>
         </div>
-        <section class="no-padding-top no-padding-bottom">
-          <div class="container-fluid">
-            <div class="row">
-              <div class="col-md-3 col-sm-6">
-                <div class="statistic-block block">
-                  <div class="progress-details d-flex align-items-end justify-content-between">
-                    <div class="title">
-                      <div class="icon"><i class="icon-user-1"></i></div><strong>New Clients</strong>
+
+        <!-- Statistics Section -->
+        <section class="mb-5">
+            <div class="container-fluid">
+                <div class="row g-3">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="statistic-block text-center">
+                            <div class="icon mb-2"><i class="icon-user-1 fs-4 text-success"></i></div>
+                            <strong>Total Users</strong>
+                            <div class="number dashtext-1 mt-2">{{ $totalUsers }}</div>
+                        </div>
                     </div>
-                    <div class="number dashtext-1">27</div>
-                  </div>
-                  <div class="progress progress-template">
-                    <div role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-template dashbg-1"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 col-sm-6">
-                <div class="statistic-block block">
-                  <div class="progress-details d-flex align-items-end justify-content-between">
-                    <div class="title">
-                      <div class="icon"><i class="icon-contract"></i></div><strong>New Projects</strong>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="statistic-block text-center">
+                            <div class="icon mb-2"><i class="icon-home fs-4 text-primary"></i></div>
+                            <strong>Total Houses</strong>
+                            <div class="number dashtext-2 mt-2">{{ $totalHouses }}</div>
+                        </div>
                     </div>
-                    <div class="number dashtext-2">375</div>
-                  </div>
-                  <div class="progress progress-template">
-                    <div role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-template dashbg-2"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 col-sm-6">
-                <div class="statistic-block block">
-                  <div class="progress-details d-flex align-items-end justify-content-between">
-                    <div class="title">
-                      <div class="icon"><i class="icon-paper-and-pencil"></i></div><strong>New Invoices</strong>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="statistic-block text-center">
+                            <div class="icon mb-2"><i class="icon-user fs-4 text-warning"></i></div>
+                            <strong>Total Tenants</strong>
+                            <div class="number dashtext-3 mt-2">{{ $totalTenants }}</div>
+                        </div>
                     </div>
-                    <div class="number dashtext-3">140</div>
-                  </div>
-                  <div class="progress progress-template">
-                    <div role="progressbar" style="width: 55%" aria-valuenow="55" aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-template dashbg-3"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 col-sm-6">
-                <div class="statistic-block block">
-                  <div class="progress-details d-flex align-items-end justify-content-between">
-                    <div class="title">
-                      <div class="icon"><i class="icon-writing-whiteboard"></i></div><strong>All Projects</strong>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="statistic-block text-center">
+                            <div class="icon mb-2"><i class="icon-user-1 fs-4 text-purple"></i></div>
+                            <strong>Total Landlords</strong>
+                            <div class="number dashtext-4 mt-2">{{ $totalLandlords }}</div>
+                        </div>
                     </div>
-                    <div class="number dashtext-4">41</div>
-                  </div>
-                  <div class="progress progress-template">
-                    <div role="progressbar" style="width: 35%" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-template dashbg-4"></div>
-                  </div>
                 </div>
-              </div>
             </div>
-          </div>
         </section>
-        <section class="no-padding-bottom">
-          <div class="container-fluid">
-            <div class="row">
-              <div class="col-lg-4">
-                <div class="bar-chart block no-margin-bottom">
-                  <canvas id="barChartExample1"></canvas>
+
+        <!-- Financial Cards -->
+        <section class="mb-5">
+            <div class="container-fluid">
+                <div class="row g-3">
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="text-success">Total Monthly Rent</h5>
+                                <p class="text-muted mb-1">All Tenants Combined</p>
+                                <h3 class="fw-bold dashtext-1">KSh {{ number_format($totalRevenue, 2) }}</h3>
+                                <small>{{ $totalTenants }} Active Tenants</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="text-primary">Total Utilities</h5>
+                                <p class="text-muted mb-1">Monthly Utilities</p>
+                                <h3 class="fw-bold dashtext-2">KSh {{ number_format($totalUtilities, 2) }}</h3>
+                                <small>Additional Charges</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="text-warning">Security Deposits</h5>
+                                <p class="text-muted mb-1">Total Held</p>
+                                <h3 class="fw-bold dashtext-3">KSh {{ number_format($totalDeposits, 2) }}</h3>
+                                <small>Refundable Deposits</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="bar-chart block">
-                  <canvas id="barChartExample2"></canvas>
-                </div>
-              </div>
-              <div class="col-lg-8">
-                <div class="line-cahrt block">
-                  <canvas id="lineCahrt"></canvas>
-                </div>
-              </div>
             </div>
-          </div>
         </section>
-        <section class="no-padding-bottom">
-          <div class="container-fluid">
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="stats-2-block block d-flex">
-                  <div class="stats-2 d-flex">
-                    <div class="stats-2-arrow low"><i class="fa fa-caret-down"></i></div>
-                    <div class="stats-2-content"><strong class="d-block">5.657</strong><span class="d-block">Standard Scans</span>
-                      <div class="progress progress-template progress-small">
-                        <div role="progressbar" style="width: 60%;" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-template progress-bar-small dashbg-2"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="stats-2 d-flex">
-                    <div class="stats-2-arrow height"><i class="fa fa-caret-up"></i></div>
-                    <div class="stats-2-content"><strong class="d-block">3.1459</strong><span class="d-block">Team Scans</span>
-                      <div class="progress progress-template progress-small">
-                        <div role="progressbar" style="width: 35%;" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-template progress-bar-small dashbg-3"></div>
-                      </div>
-                    </div>
-                  </div>
+
+        <!-- Top Landlords -->
+        <section class="mb-5">
+            <div class="container-fluid">
+                <h4 class="mb-3 text-primary fw-semibold">Top Landlords by Property Count</h4>
+                <div class="row g-3">
+                    @foreach($topLandlords->take(3) as $index => $landlord)
+                        <div class="col-lg-4">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <img src="{{ asset('img/avatar-'.($index+1).'.jpg') }}" alt="Avatar" class="rounded-circle mb-3" width="80" height="80">
+                                    <h5 class="fw-bold mb-0">{{ $landlord->user->name ?? 'N/A' }}</h5>
+                                    <small class="text-muted">{{ $landlord->user->email ?? 'N/A' }}</small>
+                                    <p class="mt-2 mb-0">{{ $landlord->houses_count }} Properties</p>
+                                    <p class="text-muted small mb-0">{{ $landlord->user->phone ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
-                <div class="stats-3-block block d-flex">
-                  <div class="stats-3"><strong class="d-block">745</strong><span class="d-block">Total requests</span>
-                    <div class="progress progress-template progress-small">
-                      <div role="progressbar" style="width: 35%;" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-template progress-bar-small dashbg-1"></div>
-                    </div>
-                  </div>
-                  <div class="stats-3 d-flex justify-content-between text-center">
-                    <div class="item"><strong class="d-block strong-sm">4.124</strong><span class="d-block span-sm">Threats</span>
-                      <div class="line"></div><small>+246</small>
-                    </div>
-                    <div class="item"><strong class="d-block strong-sm">2.147</strong><span class="d-block span-sm">Neutral</span>
-                      <div class="line"></div><small>+416</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="drills-chart block">
-                  <canvas id="lineChart1"></canvas>
-                </div>
-              </div>
             </div>
-          </div>
         </section>
-        <section class="no-padding-bottom">
-          <div class="container-fluid">
-            <div class="row">
-              <div class="col-lg-4">
-                <div class="user-block block text-center">
-                  <div class="avatar"><img src="img/avatar-1.jpg" alt="..." class="img-fluid">
-                    <div class="order dashbg-2">1st</div>
-                  </div><a href="#" class="user-title">
-                    <h3 class="h5">Richard Nevoreski</h3><span>@richardnevo</span></a>
-                  <div class="contributions">950 Contributions</div>
-                  <div class="details d-flex">
-                    <div class="item"><i class="icon-info"></i><strong>150</strong></div>
-                    <div class="item"><i class="fa fa-gg"></i><strong>340</strong></div>
-                    <div class="item"><i class="icon-flow-branch"></i><strong>460</strong></div>
-                  </div>
+
+        <!-- Recent Tenants -->
+        <section class="mb-5">
+            <div class="container-fluid">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Recent Tenants</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            @foreach($recentTenants as $tenant)
+                                <a href="#" class="list-group-item list-group-item-action d-flex align-items-center">
+                                    <img src="{{ asset('img/avatar-3.jpg') }}" class="rounded-circle me-3" width="45" height="45">
+                                    <div class="flex-fill">
+                                        <strong>{{ $tenant->user->name ?? 'N/A' }}</strong>
+                                        <p class="mb-0 text-muted">{{ $tenant->house->title ?? 'N/A' }} — KSh {{ number_format($tenant->rent, 2) }}/month</p>
+                                        <small class="text-muted">{{ $tenant->created_at->format('M d, Y') }}</small>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="user-block block text-center">
-                  <div class="avatar"><img src="img/avatar-4.jpg" alt="..." class="img-fluid">
-                    <div class="order dashbg-1">2nd</div>
-                  </div><a href="#" class="user-title">
-                    <h3 class="h5">Samuel Watson</h3><span>@samwatson</span></a>
-                  <div class="contributions">772 Contributions</div>
-                  <div class="details d-flex">
-                    <div class="item"><i class="icon-info"></i><strong>80</strong></div>
-                    <div class="item"><i class="fa fa-gg"></i><strong>420</strong></div>
-                    <div class="item"><i class="icon-flow-branch"></i><strong>272</strong></div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="user-block block text-center">
-                  <div class="avatar"><img src="img/avatar-6.jpg" alt="..." class="img-fluid">
-                    <div class="order dashbg-4">3rd</div>
-                  </div><a href="#" class="user-title">
-                    <h3 class="h5">Sebastian Wood</h3><span>@sebastian</span></a>
-                  <div class="contributions">620 Contributions</div>
-                  <div class="details d-flex">
-                    <div class="item"><i class="icon-info"></i><strong>150</strong></div>
-                    <div class="item"><i class="fa fa-gg"></i><strong>280</strong></div>
-                    <div class="item"><i class="icon-flow-branch"></i><strong>190</strong></div>
-                  </div>
-                </div>
-              </div>
             </div>
-            <div class="public-user-block block">
-              <div class="row d-flex align-items-center">
-                <div class="col-lg-4 d-flex align-items-center">
-                  <div class="order">4th</div>
-                  <div class="avatar"> <img src="img/avatar-1.jpg" alt="..." class="img-fluid"></div><a href="#" class="name"><strong class="d-block">Tomas Hecktor</strong><span class="d-block">@tomhecktor</span></a>
-                </div>
-                <div class="col-lg-4 text-center">
-                  <div class="contributions">410 Contributions</div>
-                </div>
-                <div class="col-lg-4">
-                  <div class="details d-flex">
-                    <div class="item"><i class="icon-info"></i><strong>110</strong></div>
-                    <div class="item"><i class="fa fa-gg"></i><strong>200</strong></div>
-                    <div class="item"><i class="icon-flow-branch"></i><strong>100</strong></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="public-user-block block">
-              <div class="row d-flex align-items-center">
-                <div class="col-lg-4 d-flex align-items-center">
-                  <div class="order">5th</div>
-                  <div class="avatar"> <img src="img/avatar-2.jpg" alt="..." class="img-fluid"></div><a href="#" class="name"><strong class="d-block">Alexander Shelby</strong><span class="d-block">@alexshelby</span></a>
-                </div>
-                <div class="col-lg-4 text-center">
-                  <div class="contributions">320 Contributions</div>
-                </div>
-                <div class="col-lg-4">
-                  <div class="details d-flex">
-                    <div class="item"><i class="icon-info"></i><strong>150</strong></div>
-                    <div class="item"><i class="fa fa-gg"></i><strong>120</strong></div>
-                    <div class="item"><i class="icon-flow-branch"></i><strong>50</strong></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="public-user-block block">
-              <div class="row d-flex align-items-center">
-                <div class="col-lg-4 d-flex align-items-center">
-                  <div class="order">6th</div>
-                  <div class="avatar"> <img src="img/avatar-6.jpg" alt="..." class="img-fluid"></div><a href="#" class="name"><strong class="d-block">Arther Kooper</strong><span class="d-block">@artherkooper</span></a>
-                </div>
-                <div class="col-lg-4 text-center">
-                  <div class="contributions">170 Contributions</div>
-                </div>
-                <div class="col-lg-4">
-                  <div class="details d-flex">
-                    <div class="item"><i class="icon-info"></i><strong>60</strong></div>
-                    <div class="item"><i class="fa fa-gg"></i><strong>70</strong></div>
-                    <div class="item"><i class="icon-flow-branch"></i><strong>40</strong></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </section>
-        <section class="margin-bottom-sm">
-          <div class="container-fluid">
-            <div class="row d-flex align-items-stretch">
-              <div class="col-lg-4">
-                <div class="stats-with-chart-1 block">
-                  <div class="title"> <strong class="d-block">Sales Difference</strong><span class="d-block">Lorem ipsum dolor sit</span></div>
-                  <div class="row d-flex align-items-end justify-content-between">
-                    <div class="col-5">
-                      <div class="text"><strong class="d-block dashtext-3">$740</strong><span class="d-block">May 2017</span><small class="d-block">320 Sales</small></div>
+
+        <!-- Charts Section -->
+        <section class="mb-5">
+            <div class="container-fluid">
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="text-primary">Monthly Growth - {{ date('Y') }}</h5>
+                                <canvas id="monthlyChart"></canvas>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-7">
-                      <div class="bar-chart chart">
-                        <canvas id="salesBarChart1"></canvas>
-                      </div>
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="text-primary">Houses by Category</h5>
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
                     </div>
-                  </div>
                 </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="stats-with-chart-1 block">
-                  <div class="title"> <strong class="d-block">Visit Statistics</strong><span class="d-block">Lorem ipsum dolor sit</span></div>
-                  <div class="row d-flex align-items-end justify-content-between">
-                    <div class="col-4">
-                      <div class="text"><strong class="d-block dashtext-1">$457</strong><span class="d-block">May 2017</span><small class="d-block">210 Sales</small></div>
-                    </div>
-                    <div class="col-8">
-                      <div class="bar-chart chart">
-                        <canvas id="visitPieChart"></canvas>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="stats-with-chart-1 block">
-                  <div class="title"> <strong class="d-block">Sales Activities</strong><span class="d-block">Lorem ipsum dolor sit</span></div>
-                  <div class="row d-flex align-items-end justify-content-between">
-                    <div class="col-5">
-                      <div class="text"><strong class="d-block dashtext-2">80%</strong><span class="d-block">May 2017</span><small class="d-block">+35 Sales</small></div>
-                    </div>
-                    <div class="col-7">
-                      <div class="bar-chart chart">
-                        <canvas id="salesBarChart2"></canvas>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
-          </div>
         </section>
-        <section class="no-padding-bottom">
-          <div class="container-fluid">
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="checklist-block block">
-                  <div class="title"><strong>To Do List</strong></div>
-                  <div class="checklist">
-                    <div class="item d-flex align-items-center">
-                      <input type="checkbox" id="input-1" name="input-1" class="checkbox-template">
-                      <label for="input-1">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</label>
-                    </div>
-                    <div class="item d-flex align-items-center">
-                      <input type="checkbox" id="input-2" name="input-2" checked class="checkbox-template">
-                      <label for="input-2">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</label>
-                    </div>
-                    <div class="item d-flex align-items-center">
-                      <input type="checkbox" id="input-3" name="input-3" class="checkbox-template">
-                      <label for="input-3">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</label>
-                    </div>
-                    <div class="item d-flex align-items-center">
-                      <input type="checkbox" id="input-4" name="input-4" class="checkbox-template">
-                      <label for="input-4">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</label>
-                    </div>
-                    <div class="item d-flex align-items-center">
-                      <input type="checkbox" id="input-5" name="input-5" class="checkbox-template">
-                      <label for="input-5">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</label>
-                    </div>
-                    <div class="item d-flex align-items-center">
-                      <input type="checkbox" id="input-6" name="input-6" class="checkbox-template">
-                      <label for="input-6">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="messages-block block">
-                  <div class="title"><strong>New Messages</strong></div>
-                  <div class="messages"><a href="#" class="message d-flex align-items-center">
-                      <div class="profile"><img src="img/avatar-3.jpg" alt="..." class="img-fluid">
-                        <div class="status online"></div>
-                      </div>
-                      <div class="content">   <strong class="d-block">Nadia Halsey</strong><span class="d-block">lorem ipsum dolor sit amit</span><small class="date d-block">9:30am</small></div></a><a href="#" class="message d-flex align-items-center">
-                      <div class="profile"><img src="img/avatar-2.jpg" alt="..." class="img-fluid">
-                        <div class="status away"></div>
-                      </div>
-                      <div class="content">   <strong class="d-block">Peter Ramsy</strong><span class="d-block">lorem ipsum dolor sit amit</span><small class="date d-block">7:40am</small></div></a><a href="#" class="message d-flex align-items-center">
-                      <div class="profile"><img src="img/avatar-1.jpg" alt="..." class="img-fluid">
-                        <div class="status busy"></div>
-                      </div>
-                      <div class="content">   <strong class="d-block">Sam Kaheil</strong><span class="d-block">lorem ipsum dolor sit amit</span><small class="date d-block">6:55am</small></div></a><a href="#" class="message d-flex align-items-center">
-                      <div class="profile"><img src="img/avatar-5.jpg" alt="..." class="img-fluid">
-                        <div class="status offline"></div>
-                      </div>
-                      <div class="content">   <strong class="d-block">Sara Wood</strong><span class="d-block">lorem ipsum dolor sit amit</span><small class="date d-block">10:30pm</small></div></a><a href="#" class="message d-flex align-items-center">
-                      <div class="profile"><img src="img/avatar-1.jpg" alt="..." class="img-fluid">
-                        <div class="status online"></div>
-                      </div>
-                      <div class="content">   <strong class="d-block">Nader Magdy</strong><span class="d-block">lorem ipsum dolor sit amit</span><small class="date d-block">9:47pm</small></div></a></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section>
-          <div class="container-fluid">
-            <div class="row">
-              <div class="col-lg-4">
-                <div class="stats-with-chart-2 block">
-                  <div class="title"><strong class="d-block">Credit Sales</strong><span class="d-block">Lorem ipsum dolor sit</span></div>
-                  <div class="piechart chart">
-                    <canvas id="pieChartHome1"></canvas>
-                    <div class="text"><strong class="d-block">$2.145</strong><span class="d-block">Sales</span></div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="stats-with-chart-2 block">
-                  <div class="title"><strong class="d-block">Channel Sales</strong><span class="d-block">Lorem ipsum dolor sit</span></div>
-                  <div class="piechart chart">
-                    <canvas id="pieChartHome2"></canvas>
-                    <div class="text"><strong class="d-block">$7.784</strong><span class="d-block">Sales</span></div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="stats-with-chart-2 block">
-                  <div class="title"><strong class="d-block">Direct Sales</strong><span class="d-block">Lorem ipsum dolor sit</span></div>
-                  <div class="piechart chart">
-                    <canvas id="pieChartHome3"></canvas>
-                    <div class="text"><strong class="d-block">$4.957</strong><span class="d-block">Sales</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        <footer class="footer">
-          <div class="footer__block block no-margin-bottom">
+
+        <footer class="footer mt-4">
             <div class="container-fluid text-center">
-              <!-- Please do not remove the backlink to us unless you support us at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
-               <p class="no-margin-bottom">2018 &copy; Your company. Download From <a target="_blank" href="https://templateshub.net">Templates Hub</a>.</p>
+                <p class="no-margin-bottom mb-0">{{ date('Y') }} &copy; Property Management System</p>
             </div>
-          </div>
         </footer>
+    </div>
+</div>
+
+@include('admin.js')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    new Chart(monthlyCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+            datasets: [{
+                label: 'New Tenants',
+                data: @json(array_values($tenantData)),
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25,135,84,0.2)',
+                tension: 0.1
+            },{
+                label: 'New Houses',
+                data: @json(array_values($houseData)),
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13,110,253,0.2)',
+                tension: 0.1
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: @json(array_keys($housesByCategory)),
+            datasets: [{
+                data: @json(array_values($housesByCategory)),
+                backgroundColor: ['#0d6efd','#198754','#ffc107','#dc3545','#6f42c1','#20c997']
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+</script>
+</body>
+</html>

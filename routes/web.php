@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/',[HomeController::class, 'home']);
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return view('home.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -23,7 +23,10 @@ require __DIR__.'/auth.php';
 
 // Category routes
 
-Route::get('admin/dashboard', [HomeController::class, 'index'])->
+// Route::get('admin/dashboard', [HomeController::class, 'index'])->
+//     middleware(['auth', 'admin']);
+
+Route::get('admin/dashboard', [AdminController::class, 'index'])->
     middleware(['auth', 'admin']);
 
 Route::get('view_category', [AdminController::class, 'view_category'])->
