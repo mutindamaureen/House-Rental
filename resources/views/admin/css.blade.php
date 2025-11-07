@@ -21,7 +21,49 @@
 <link rel="shortcut icon" href="{{ asset('admincss/img/favicon.ico') }}">
 
 
+<style>
+    /* Make the sidebar sticky and scrollable only when hovered */
+    #sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh; /* full viewport height */
+    overflow-y: hidden; /* hide scroll by default */
+    overflow-x: hidden;
+    transition: all 0.2s ease-in-out;
+    background: #343a40; /* adjust to your theme */
+    color: #fff;
+    z-index: 1000;
+    }
 
+    /* Show scrollbar only when hovered */
+    #sidebar:hover {
+    overflow-y: auto;
+    }
+
+    /* Optional: make scrollbar look cleaner */
+    #sidebar::-webkit-scrollbar {
+    width: 6px;
+    }
+
+    #sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    }
+
+    #sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Ensure main content scrolls independently */
+    .page-content {
+    flex: 1;
+    overflow-y: auto;
+    height: 100vh;
+    /* background: #f8f9fa; */
+    padding: 20px;
+    }
+
+</style>
 <!-- Tweaks for older IEs -->
 <!--[if lt IE 9]>
   <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>

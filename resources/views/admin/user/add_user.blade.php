@@ -8,6 +8,7 @@
 
     <div class="d-flex align-items-stretch">
         @include('admin.sidebar')
+      <div class="page-content">
 
         <div class="container py-4">
             <div class="card shadow-sm">
@@ -61,7 +62,7 @@
                 </div>
             </div>
         </div>
-
+        </div>
     </div>
     <!-- JavaScript files-->
     @include('admin.js')

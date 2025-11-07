@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Contract;
 use App\Models\House;
 use App\Models\Landlord;
+use App\Models\MaintenanceRequest;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -121,6 +123,128 @@ class AdminController extends Controller
         toastr()->closeButton()->success('Category updated successfully.');
         return redirect('/view_category');
     }
+
+    // =========================
+    // Maintenance Requests
+    // =========================
+
+    public function view_maintenancerequest()
+    {
+        $data = MaintenanceRequest::with([
+            'tenant:id,name,email',
+            'landlord:id,name,email'
+        ])->latest()->paginate(15);
+
+        return view('admin.maintenance.view_maintenance', compact('data'));
+    }
+
+    public function add_maintenancerequest()
+    {
+        $tenants = User::where('usertype', 'tenant')->select('id', 'name', 'email')->get();
+        $landlords = User::where('usertype', 'landlord')->select('id', 'name', 'email')->get();
+        $houses = House::select('id', 'title')->get();
+
+        return view('admin.maintenance.add_maintenance', compact('tenants', 'landlords', 'houses'));
+    }
+
+    public function upload_maintenancerequest(Request $request)
+    {
+        $validated = $request->validate([
+            'tenant_id' => 'required|exists:users,id',
+            'landlord_id' => 'nullable|exists:users,id',
+            'house_name' => 'required|string|max:255',
+            'subject' => 'required|string|max:255',
+            'description' => 'required|string',
+            'status' => 'nullable|in:pending,in_progress,completed,cancelled',
+        ]);
+
+        try {
+            $maintenance = new MaintenanceRequest();
+            $maintenance->tenant_id = $validated['tenant_id'];
+            $maintenance->landlord_id = $validated['landlord_id'] ?? null;
+            $maintenance->house_name = $validated['house_name'];
+            $maintenance->subject = $validated['subject'];
+            $maintenance->description = $validated['description'];
+            $maintenance->status = $validated['status'] ?? 'pending';
+            $maintenance->save();
+
+            // Optional: Email landlord
+            if ($maintenance->landlord_id) {
+                $landlord = User::find($maintenance->landlord_id);
+                if ($landlord && $landlord->email) {
+                    Mail::raw(
+                        "Hello {$landlord->name},\n\nA new maintenance request has been submitted.\n\nSubject: {$maintenance->subject}\nHouse: {$maintenance->house_name}\n\nPlease log in to view details.",
+                        function ($message) use ($landlord) {
+                            $message->to($landlord->email)->subject('New Maintenance Request');
+                        }
+                    );
+                }
+            }
+
+            toastr()->closeButton()->success('Maintenance request added successfully.');
+            return redirect()->back();
+
+        } catch (\Exception $e) {
+            toastr()->closeButton()->error('Error: ' . $e->getMessage());
+            return redirect()->back()->withInput();
+        }
+    }
+
+    public function edit_maintenancerequest($id)
+    {
+        $maintenance = MaintenanceRequest::with(['tenant', 'landlord'])->findOrFail($id);
+        $tenants = User::where('usertype', 'tenant')->select('id', 'name', 'email')->get();
+        $landlords = User::where('usertype', 'landlord')->select('id', 'name', 'email')->get();
+        $houses = House::select('id', 'title')->get();
+
+        return view('admin.maintenance.edit_maintenance', compact('maintenance', 'tenants', 'landlords', 'houses'));
+    }
+
+    public function update_maintenancerequest(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'tenant_id' => 'required|exists:users,id',
+            'landlord_id' => 'nullable|exists:users,id',
+            'house_name' => 'required|string|max:255',
+            'subject' => 'required|string|max:255',
+            'description' => 'required|string',
+            'status' => 'required|in:pending,in_progress,completed,cancelled',
+        ]);
+
+        try {
+            $maintenance = MaintenanceRequest::findOrFail($id);
+            $maintenance->tenant_id = $validated['tenant_id'];
+            $maintenance->landlord_id = $validated['landlord_id'] ?? null;
+            $maintenance->house_name = $validated['house_name'];
+            $maintenance->subject = $validated['subject'];
+            $maintenance->description = $validated['description'];
+            $maintenance->status = $validated['status'];
+            $maintenance->save();
+
+            toastr()->closeButton()->success('Maintenance request updated successfully.');
+            return redirect('/view_maintenancerequest');
+
+        } catch (\Exception $e) {
+            toastr()->closeButton()->error('Error: ' . $e->getMessage());
+            return redirect()->back()->withInput();
+        }
+    }
+
+    public function delete_maintenancerequest($id)
+    {
+        try {
+            $maintenance = MaintenanceRequest::findOrFail($id);
+            $maintenance->delete();
+
+            toastr()->closeButton()->success('Maintenance request deleted successfully.');
+            return redirect()->back();
+
+        } catch (\Exception $e) {
+            toastr()->closeButton()->error('Error deleting maintenance request: ' . $e->getMessage());
+            return redirect()->back();
+        }
+    }
+
 
     // House
     public function add_house(){
@@ -282,18 +406,42 @@ class AdminController extends Controller
         return redirect('/view_user');
     }
 
+
+    public function view_tenant(){
+        // ✅ FIX: Use pagination and only load needed columns
+        $tenants = Tenant::with([
+            'user:id,name,email,phone',
+            'house:id,title,price'
+        ])->paginate(15);
+
+        return view('admin.tenant.view_tenant', compact('tenants'));
+    }
+
+
+    public function edit_tenant($id)
+    {
+        $tenants = Tenant::findOrFail($id);
+        $users = User::select('id', 'name', 'email')->get();
+        $houses = House::select('id', 'title', 'price')->get();
+        $landlords = User::where('usertype', 'landlord')
+                        ->select('id', 'name')
+                        ->get();
+
+        return view('admin.tenant.edit_tenant', compact('tenants', 'users', 'houses', 'landlords'));
+    }
+
     public function add_tenant(){
         $users = User::where('usertype', 'user')
                     ->whereNotIn('id', Tenant::pluck('user_id'))
-                    ->select('id', 'name', 'email') // ✅ FIX: Only select needed columns
+                    ->select('id', 'name', 'email')
                     ->get();
 
         $houses = House::whereNotIn('id', Tenant::pluck('house_id'))
-                      ->select('id', 'title', 'price') // ✅ FIX
-                      ->get();
+                    ->select('id', 'title', 'price')
+                    ->get();
 
         $landlords = User::where('usertype', 'landlord')
-                        ->select('id', 'name') // ✅ FIX
+                        ->select('id', 'name')
                         ->get();
 
         return view('admin.tenant.add_tenant', compact('users', 'houses', 'landlords'));
@@ -348,6 +496,10 @@ class AdminController extends Controller
             $tenant->emergency_contact_phone = $validated['emergency_contact_phone'] ?? null;
             $tenant->save();
 
+            // ✅ CHANGE USERTYPE TO TENANT
+            $user->usertype = 'tenant';
+            $user->save();
+
             if ($user->email) {
                 $loginUrl = url('/login');
                 Mail::raw("Hello {$user->name},\n\nYour tenancy record has been created successfully.\nYou can access your account here: {$loginUrl}", function ($message) use ($user) {
@@ -365,34 +517,26 @@ class AdminController extends Controller
         }
     }
 
-    public function view_tenant(){
-        // ✅ FIX: Use pagination and only load needed columns
-        $tenants = Tenant::with([
-            'user:id,name,email,phone',
-            'house:id,title,price'
-        ])->paginate(15);
-
-        return view('admin.tenant.view_tenant', compact('tenants'));
-    }
-
     public function delete_tenant($id){
-        $tenants = Tenant::find($id);
-        $tenants->delete();
+        try {
+            $tenant = Tenant::findOrFail($id);
+            $user = $tenant->user;
 
-        toastr()->closeButton()->success('Tenant deleted successfully.');
-        return redirect()->back();
-    }
+            $tenant->delete();
 
-    public function edit_tenant($id)
-    {
-        $tenants = Tenant::findOrFail($id);
-        $users = User::select('id', 'name', 'email')->get();
-        $houses = House::select('id', 'title', 'price')->get();
-        $landlords = User::where('usertype', 'landlord')
-                        ->select('id', 'name')
-                        ->get();
+            // ✅ REVERT USERTYPE BACK TO USER
+            if ($user) {
+                $user->usertype = 'user';
+                $user->save();
+            }
 
-        return view('admin.tenant.edit_tenant', compact('tenants', 'users', 'houses', 'landlords'));
+            toastr()->closeButton()->success('Tenant deleted successfully.');
+            return redirect()->back();
+
+        } catch (\Exception $e) {
+            toastr()->closeButton()->error('Error deleting tenant: ' . $e->getMessage());
+            return redirect()->back();
+        }
     }
 
     public function update_tenant(Request $request, $id)
@@ -412,21 +556,49 @@ class AdminController extends Controller
         ]);
 
         try {
-            $tenants = Tenant::findOrFail($id);
+            $tenant = Tenant::findOrFail($id);
+            $oldUserId = $tenant->user_id;
 
-            $tenants->user_id = $validated['user_id'];
-            $tenants->house_id = $validated['house_id'];
-            $tenants->landlord_id = $validated['landlord_id'] ?? null;
-            $tenants->national_id = $validated['national_id'] ?? null;
-            $tenants->rent = $validated['rent'];
-            $tenants->utilities = $validated['utilities'] ?? 0;
-            $tenants->security_deposit = $validated['security_deposit'] ?? 0;
-            $tenants->lease_start_date = $validated['lease_start_date'] ?? null;
-            $tenants->lease_end_date = $validated['lease_end_date'] ?? null;
-            $tenants->emergency_contact_name = $validated['emergency_contact_name'] ?? null;
-            $tenants->emergency_contact_phone = $validated['emergency_contact_phone'] ?? null;
+            // Check if new user is already a tenant (if user is being changed)
+            if ($oldUserId != $validated['user_id']) {
+                $existingTenant = Tenant::where('user_id', $validated['user_id'])
+                                        ->where('id', '!=', $id)
+                                        ->first();
+                if ($existingTenant) {
+                    toastr()->closeButton()->error('This user is already registered as another tenant.');
+                    return redirect()->back()->withInput();
+                }
+            }
 
-            $tenants->save();
+            $tenant->user_id = $validated['user_id'];
+            $tenant->house_id = $validated['house_id'];
+            $tenant->landlord_id = $validated['landlord_id'] ?? null;
+            $tenant->national_id = $validated['national_id'] ?? null;
+            $tenant->rent = $validated['rent'];
+            $tenant->utilities = $validated['utilities'] ?? 0;
+            $tenant->security_deposit = $validated['security_deposit'] ?? 0;
+            $tenant->lease_start_date = $validated['lease_start_date'] ?? null;
+            $tenant->lease_end_date = $validated['lease_end_date'] ?? null;
+            $tenant->emergency_contact_name = $validated['emergency_contact_name'] ?? null;
+            $tenant->emergency_contact_phone = $validated['emergency_contact_phone'] ?? null;
+            $tenant->save();
+
+            // ✅ HANDLE USERTYPE CHANGES IF USER WAS CHANGED
+            if ($oldUserId != $validated['user_id']) {
+                // Revert old user back to 'user'
+                $oldUser = User::find($oldUserId);
+                if ($oldUser) {
+                    $oldUser->usertype = 'user';
+                    $oldUser->save();
+                }
+
+                // Set new user to 'tenant'
+                $newUser = User::find($validated['user_id']);
+                if ($newUser) {
+                    $newUser->usertype = 'tenant';
+                    $newUser->save();
+                }
+            }
 
             toastr()->closeButton()->success('Tenant updated successfully.');
             return redirect('/view_tenant');
@@ -436,7 +608,6 @@ class AdminController extends Controller
             return redirect()->back()->withInput();
         }
     }
-
     // Landlords
     public function add_landlord(){
         $users = User::where('usertype', 'user')
@@ -577,4 +748,238 @@ class AdminController extends Controller
             return redirect()->back()->withInput();
         }
     }
+
+    // =========================
+    // Contract Management
+    // =========================
+
+    public function view_contract()
+    {
+        $data = Contract::with([
+            'landlord:id,name,email',
+            'tenant:id,name,email',
+            'house:id,title,location'
+        ])
+        ->latest()
+        ->paginate(15);
+
+        return view('admin.contract.view_contract', compact('data'));
+    }
+
+    public function add_contract()
+    {
+        // Get landlords
+        $landlords = User::where('usertype', 'landlord')
+                        ->select('id', 'name', 'email')
+                        ->get();
+
+        // Get tenants
+        $tenants = User::where('usertype', 'tenant')
+                      ->select('id', 'name', 'email')
+                      ->get();
+
+        // Get houses
+        $houses = House::select('id', 'title', 'location', 'price')->get();
+
+        return view('admin.contract.add_contract', compact('landlords', 'tenants', 'houses'));
+    }
+
+    public function upload_contract(Request $request)
+    {
+        $validated = $request->validate([
+            'landlord_id' => 'required|exists:users,id',
+            'tenant_id' => 'required|exists:users,id',
+            'house_id' => 'required|exists:houses,id',
+            'contract_pdf' => 'required|file|mimes:pdf|max:10240', // 10MB max
+            'status' => 'nullable|in:pending,signed',
+        ]);
+
+        try {
+            // Check if landlord is actually a landlord
+            $landlord = User::find($validated['landlord_id']);
+            if ($landlord->usertype !== 'landlord') {
+                toastr()->closeButton()->error('Selected user is not a landlord.');
+                return redirect()->back()->withInput();
+            }
+
+            // Check if tenant is actually a tenant
+            $tenant = User::find($validated['tenant_id']);
+            if ($tenant->usertype !== 'tenant') {
+                toastr()->closeButton()->error('Selected user is not a tenant.');
+                return redirect()->back()->withInput();
+            }
+
+            // Check for existing contract
+            $existingContract = Contract::where('tenant_id', $validated['tenant_id'])
+                                       ->where('house_id', $validated['house_id'])
+                                       ->where('status', 'pending')
+                                       ->first();
+
+            if ($existingContract) {
+                toastr()->closeButton()->error('An active contract already exists for this tenant and house.');
+                return redirect()->back()->withInput();
+            }
+
+            $contract = new Contract();
+            $contract->landlord_id = $validated['landlord_id'];
+            $contract->tenant_id = $validated['tenant_id'];
+            $contract->house_id = $validated['house_id'];
+            $contract->status = $validated['status'] ?? 'pending';
+
+            // Handle PDF upload
+            if ($request->hasFile('contract_pdf')) {
+                $file = $request->file('contract_pdf');
+                $filename = time() . '_' . uniqid() . '.pdf';
+                $file->move(public_path('contracts'), $filename);
+                $contract->contract_pdf = $filename;
+            }
+
+            $contract->save();
+
+            // Send email notification to tenant
+            if ($tenant->email) {
+                $contractUrl = url('/tenant/contracts');
+                Mail::raw(
+                    "Hello {$tenant->name},\n\nA new contract has been created for you.\n\nHouse: {$contract->house->title}\nLocation: {$contract->house->location}\n\nPlease log in to review and sign the contract: {$contractUrl}",
+                    function ($message) use ($tenant) {
+                        $message->to($tenant->email)
+                               ->subject('New Contract - Action Required');
+                    }
+                );
+            }
+
+            toastr()->closeButton()->success('Contract added successfully and notification sent to tenant.');
+            return redirect()->back();
+
+        } catch (\Exception $e) {
+            toastr()->closeButton()->error('Error: ' . $e->getMessage());
+            return redirect()->back()->withInput();
+        }
+    }
+
+    public function edit_contract($id)
+    {
+        $contract = Contract::with(['landlord', 'tenant', 'house'])->findOrFail($id);
+
+        $landlords = User::where('usertype', 'landlord')
+                        ->select('id', 'name', 'email')
+                        ->get();
+
+        $tenants = User::where('usertype', 'tenant')
+                      ->select('id', 'name', 'email')
+                      ->get();
+
+        $houses = House::select('id', 'title', 'location', 'price')->get();
+
+        return view('admin.contract.edit_contract', compact('contract', 'landlords', 'tenants', 'houses'));
+    }
+
+    public function update_contract(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'landlord_id' => 'required|exists:users,id',
+            'tenant_id' => 'required|exists:users,id',
+            'house_id' => 'required|exists:houses,id',
+            'contract_pdf' => 'nullable|file|mimes:pdf|max:10240',
+            'status' => 'required|in:pending,signed',
+        ]);
+
+        try {
+            $contract = Contract::findOrFail($id);
+
+            // Check if landlord is actually a landlord
+            $landlord = User::find($validated['landlord_id']);
+            if ($landlord->usertype !== 'landlord') {
+                toastr()->closeButton()->error('Selected user is not a landlord.');
+                return redirect()->back()->withInput();
+            }
+
+            // Check if tenant is actually a tenant
+            $tenant = User::find($validated['tenant_id']);
+            if ($tenant->usertype !== 'tenant') {
+                toastr()->closeButton()->error('Selected user is not a tenant.');
+                return redirect()->back()->withInput();
+            }
+
+            $contract->landlord_id = $validated['landlord_id'];
+            $contract->tenant_id = $validated['tenant_id'];
+            $contract->house_id = $validated['house_id'];
+            $contract->status = $validated['status'];
+
+            // Handle PDF upload if new file is provided
+            if ($request->hasFile('contract_pdf')) {
+                // Delete old PDF
+                $old_pdf_path = public_path('contracts/' . $contract->contract_pdf);
+                if (file_exists($old_pdf_path) && $contract->contract_pdf) {
+                    unlink($old_pdf_path);
+                }
+
+                // Upload new PDF
+                $file = $request->file('contract_pdf');
+                $filename = time() . '_' . uniqid() . '.pdf';
+                $file->move(public_path('contracts'), $filename);
+                $contract->contract_pdf = $filename;
+            }
+
+            $contract->save();
+
+            toastr()->closeButton()->success('Contract updated successfully.');
+            return redirect('/view_contract');
+
+        } catch (\Exception $e) {
+            toastr()->closeButton()->error('Error updating contract: ' . $e->getMessage());
+            return redirect()->back()->withInput();
+        }
+    }
+
+    public function delete_contract($id)
+    {
+        try {
+            $contract = Contract::findOrFail($id);
+
+            // Delete PDF file
+            $pdf_path = public_path('contracts/' . $contract->contract_pdf);
+            if (file_exists($pdf_path)) {
+                unlink($pdf_path);
+            }
+
+            // Delete signature file if exists
+            if ($contract->tenant_signature) {
+                $signature_path = public_path('signatures/' . $contract->tenant_signature);
+                if (file_exists($signature_path)) {
+                    unlink($signature_path);
+                }
+            }
+
+            $contract->delete();
+
+            toastr()->closeButton()->success('Contract deleted successfully.');
+            return redirect()->back();
+
+        } catch (\Exception $e) {
+            toastr()->closeButton()->error('Error deleting contract: ' . $e->getMessage());
+            return redirect()->back();
+        }
+    }
+
+    public function view_contract_details($id)
+    {
+        $contract = Contract::with(['landlord', 'tenant', 'house'])->findOrFail($id);
+        return view('admin.contract.view_details', compact('contract'));
+    }
+
+    public function download_contract($id)
+    {
+        $contract = Contract::findOrFail($id);
+        $file_path = public_path('contracts/' . $contract->contract_pdf);
+
+        if (!file_exists($file_path)) {
+            toastr()->closeButton()->error('Contract file not found.');
+            return redirect()->back();
+        }
+
+        return response()->download($file_path);
+    }
+
+
 }
