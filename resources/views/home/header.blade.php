@@ -16,9 +16,6 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" href="{{ url('/') }}">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="{{ url('houses') }}">View Houses</a>
-                    </li>
                     <!-- Authentication Links -->
                     @guest
                         <li class="nav-item">
@@ -34,10 +31,22 @@
                     @else
                         <!-- Shopping Bag -->
                         <li class="nav-item">
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="nav-link btn text-dark border-0 bg-transparent" style="display:inline;">
-                                    <i class="fas fa-sign-out-alt"></i> Logout
+
+                            <a class="nav-link text-dark" href="{{ route('see_house') }}">View Houses</a>
+                        </li>
+                        <!-- Search Toggle -->
+                        <li class="nav-item">
+                            <button id="searchToggle" class="btn nav_search-btn" type="button">
+                                <i class="fas fa-search text-dark"></i>
+                            </button>
+                        </li>
+                        <!-- Search Form (hidden by default) -->
+                        <li class="nav-item" id="searchForm" style="display: none;">
+                            <form class="d-flex ms-2" action="{{ url('search') }}" method="GET">
+                                <input class="form-control form-control-sm me-2" type="search" name="query" placeholder="Search houses..." aria-label="Search" style="width: 200px;">
+                                <button class="btn btn-outline-dark btn-sm" type="submit">Search</button>
+                                <button id="closeSearch" class="btn btn-link text-dark btn-sm ms-1" type="button">
+                                    <i class="fas fa-times"></i>
                                 </button>
                             </form>
                         </li>
@@ -46,23 +55,16 @@
                                 <i class="fas fa-shopping-bag"></i>
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="nav-link btn text-dark border-0 bg-transparent" style="display:inline;">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
+                            </form>
+                        </li>
                     @endguest
-                    <!-- Search Toggle -->
-                    <li class="nav-item">
-                        <button id="searchToggle" class="btn nav_search-btn" type="button">
-                            <i class="fas fa-search text-dark"></i>
-                        </button>
-                    </li>
-                    <!-- Search Form (hidden by default) -->
-                    <li class="nav-item" id="searchForm" style="display: none;">
-                        <form class="d-flex ms-2" action="{{ url('search') }}" method="GET">
-                            <input class="form-control form-control-sm me-2" type="search" name="query" placeholder="Search houses..." aria-label="Search" style="width: 200px;">
-                            <button class="btn btn-outline-dark btn-sm" type="submit">Search</button>
-                            <button id="closeSearch" class="btn btn-link text-dark btn-sm ms-1" type="button">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </form>
-                    </li>
                 </ul>
             </div>
         </div>

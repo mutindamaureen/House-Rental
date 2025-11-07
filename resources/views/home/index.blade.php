@@ -17,6 +17,8 @@
   </div>
   <!-- end hero area -->
 
+  @include('home.services')
+
   <!-- shop section -->
 
   @include('home.about')

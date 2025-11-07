@@ -6,10 +6,31 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/',[HomeController::class, 'home']);
+Route::get('/dashboard',[HomeController::class, 'login_home'])->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('/houses', [HomeController::class, 'houses'])->name('houses');
+Route::get('/houses', [HomeController::class, 'houses'])->name('houses');
+Route::get('/see_house', [HomeController::class, 'see_house'])->name('see_house');
+Route::get('/house_details/{id}', [HomeController::class, 'house_details'])->name('house.details');
 
-Route::get('/dashboard', function () {
-    return view('home.index');
-})->middleware(['auth', 'verified'])->name('dashboard');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -138,3 +159,11 @@ Route::get('edit_landlord/{id}', [AdminController::class, 'edit_landlord'])->
 
 Route::post('update_landlord/{id}', [AdminController::class, 'update_landlord'])->
     middleware(['auth', 'admin']);
+
+
+
+
+// Route::get('/houses', [HomeController::class, 'house'])
+//     ->middleware('auth')
+//     ->name('houses');
+

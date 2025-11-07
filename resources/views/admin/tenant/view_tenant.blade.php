@@ -48,6 +48,7 @@
                                             <th scope="col">Landlord</th>
                                             <th scope="col">Rent</th>
                                             <th scope="col">Utilities</th>
+                                            <th scope="col">Total Rent</th>
                                             <th scope="col">Security Deposit</th>
                                             <th scope="col">Lease Start</th>
                                             <th scope="col">Lease End</th>
@@ -66,6 +67,7 @@
                                             <td>{{ $tenant->landlord->name ?? 'N/A' }}</td>
                                             <td>KES {{ number_format($tenant->rent, 2) }}</td>
                                             <td>KES {{ number_format($tenant->utilities ?? 0, 2) }}</td>
+                                            <td>KES {{ number_format($tenant->total_rent, 2) }}</td>
                                             <td>KES {{ number_format($tenant->security_deposit ?? 0, 2) }}</td>
                                             <td>{{ $tenant->lease_start_date ? \Carbon\Carbon::parse($tenant->lease_start_date)->format('d M Y') : 'N/A' }}</td>
                                             <td>{{ $tenant->lease_end_date ? \Carbon\Carbon::parse($tenant->lease_end_date)->format('d M Y') : 'N/A' }}</td>

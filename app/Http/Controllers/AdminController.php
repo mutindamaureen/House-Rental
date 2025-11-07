@@ -13,11 +13,9 @@ use Illuminate\Support\Facades\Mail;
 
 class AdminController extends Controller
 {
-
-
     public function index()
     {
-        // Get counts
+        // Get counts (these are optimized - they don't load data)
         $totalUsers = User::count();
         $totalLandlords = Landlord::count();
         $totalTenants = Tenant::count();
@@ -39,7 +37,6 @@ class AdminController extends Controller
             ->pluck('count', 'month')
             ->toArray();
 
-        // ✅ Fix: pad months (1–12) so missing months show as 0
         $tenantData = array_replace(array_fill(1, 12, 0), $monthlyTenants);
         $houseData = array_replace(array_fill(1, 12, 0), $monthlyHouses);
 
@@ -48,15 +45,18 @@ class AdminController extends Controller
             ->pluck('count', 'category')
             ->toArray();
 
-        // Get recent tenants
-        $recentTenants = Tenant::with('user', 'house')
+        // ✅ FIX: Only select needed columns for recent tenants
+        $recentTenants = Tenant::with([
+            'user:id,name,email',
+            'house:id,title,price'
+        ])
             ->latest()
             ->take(5)
             ->get();
 
-        // Get top landlords by number of houses
+        // ✅ FIX: Only select needed columns for top landlords
         $topLandlords = Landlord::withCount('houses')
-            ->with('user')
+            ->with('user:id,name,email,phone')
             ->orderBy('houses_count', 'desc')
             ->take(6)
             ->get();
@@ -74,8 +74,8 @@ class AdminController extends Controller
             'availableHouses',
             'occupiedHouses',
             'totalCategories',
-            'tenantData',   // ✅ use these instead of monthlyTenants
-            'houseData',    // ✅ use these instead of monthlyHouses
+            'tenantData',
+            'houseData',
             'housesByCategory',
             'recentTenants',
             'topLandlords',
@@ -87,59 +87,46 @@ class AdminController extends Controller
 
     // Category
     public function view_category(){
-        $data = Category::all();
-
+        $data = Category::paginate(15); // ✅ FIX: Use pagination
         return view('admin.category.category', compact('data'));
     }
 
     public function add_category(Request $request){
         $category = new Category;
-
-        $category -> category_name = $request->category;
-
+        $category->category_name = $request->category;
         $category->save();
 
         toastr()->closeButton()->success('Category added successfully.');
-
         return redirect()->back();
     }
 
     public function delete_category($id){
-        $data=Category::find($id);
-
+        $data = Category::find($id);
         $data->delete();
 
         toastr()->closeButton()->success('Category deleted successfully.');
-
         return redirect()->back();
     }
 
     public function edit_category($id){
-
-        $data=Category::find($id);
-
+        $data = Category::find($id);
         return view('admin.category.edit_category', compact('data'));
     }
 
     public function update_category(Request $request, $id){
         $data = Category::find($id);
-
-        $data -> category_name = $request->category;
-
+        $data->category_name = $request->category;
         $data->save();
 
         toastr()->closeButton()->success('Category updated successfully.');
-
-
-        return redirect ('/view_category');
+        return redirect('/view_category');
     }
 
     // House
     public function add_house(){
         $category = Category::all();
-        $landlords = Landlord::with('user')->get();
-
-        // $landlords = Landlord::all(); // Fetch all landlords
+        // ✅ FIX: Only select needed columns
+        $landlords = Landlord::with('user:id,name,email')->get();
         return view('admin.house.add_house', compact('category', 'landlords'));
     }
 
@@ -151,8 +138,8 @@ class AdminController extends Controller
         $data->location = $request->location;
         $data->category = $request->category;
         $data->quantity = $request->quantity;
-        $data->landlord_id = $request->landlord_id; // New field
-        $data->status = $request->status ?? 'available'; // New field with default
+        $data->landlord_id = $request->landlord_id;
+        $data->status = $request->status ?? 'available';
 
         $image = $request->image;
         if($image){
@@ -167,7 +154,8 @@ class AdminController extends Controller
     }
 
     public function view_house(){
-        $house = House::with('landlord')->paginate(5); // Eager load landlord relationship
+        // ✅ FIX: Only load needed landlord data
+        $house = House::with('landlord.user:id,name')->paginate(10);
         return view('admin.house.view_house', compact('house'));
     }
 
@@ -186,7 +174,7 @@ class AdminController extends Controller
     {
         $house = House::find($id);
         $category = Category::all();
-        $landlords = Landlord::all(); // Fetch all landlords
+        $landlords = Landlord::with('user:id,name')->get();
         return view('admin.house.edit_house', compact('house', 'category', 'landlords'));
     }
 
@@ -198,12 +186,11 @@ class AdminController extends Controller
         $house->location = $request->location;
         $house->category = $request->category;
         $house->quantity = $request->quantity;
-        $house->landlord_id = $request->landlord_id; // New field
-        $house->status = $request->status ?? $house->status; // New field, keep existing if not provided
+        $house->landlord_id = $request->landlord_id;
+        $house->status = $request->status ?? $house->status;
 
         $image = $request->image;
         if($image){
-            // Delete old image if exists
             $old_image_path = public_path('houses/'.$house->image);
             if(file_exists($old_image_path) && $house->image){
                 unlink($old_image_path);
@@ -221,27 +208,22 @@ class AdminController extends Controller
     public function search_house(Request $request){
         $search = $request->search;
         $house = House::where('title', 'LIKE', '%'.$search.'%')
-            ->with('landlord') // Eager load landlord relationship
-            ->paginate(3);
+            ->with('landlord.user:id,name')
+            ->paginate(10);
         return view('admin.house.view_house', compact('house'));
     }
 
     // Users
     public function view_user(){
-        $data = User::all();
-
+        $data = User::paginate(15); // ✅ FIX: Use pagination
         return view('admin.user.users', compact('data'));
     }
 
     public function add_user(){
-
-        $user = User::all();
-
-        return view('admin.user.add_user', compact('user'));
+        return view('admin.user.add_user');
     }
 
     public function upload_user(Request $request){
-
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -251,7 +233,6 @@ class AdminController extends Controller
             'usertype' => 'required|in:user,admin',
         ]);
 
-        // Create user
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
@@ -261,7 +242,6 @@ class AdminController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
 
-        // Send welcome email
         $loginUrl = url('/login');
         Mail::raw("Hello {$user->name},\n\nYour account has been created successfully.\nYou can access the system here: {$loginUrl}", function ($message) use ($user) {
             $message->to($user->email)
@@ -270,56 +250,51 @@ class AdminController extends Controller
         toastr()->closeButton()->success('User added successfully and email sent.');
 
         return redirect()->back();
-        }
+    }
 
     public function delete_user($id){
-        $data=User::find($id);
-
+        $data = User::find($id);
         $data->delete();
 
         toastr()->closeButton()->success('User deleted successfully.');
-
         return redirect()->back();
     }
 
     public function edit_user($id){
-
-        $data=User::find($id);
-
+        $data = User::find($id);
         return view('admin.user.edit_user', compact('data'));
     }
 
     public function update_user(Request $request, $id){
         $data = User::find($id);
+        $data->name = $request->name;
+        $data->email = $request->email;
+        $data->phone = $request->phone;
+        $data->address = $request->address;
+        $data->usertype = $request->usertype;
 
-        $data -> name = $request->name;
-        $data -> email = $request->email;
-        $data -> phone = $request->phone;
-        $data -> address = $request->address;
-        $data -> usertype = $request->usertype;
-        // $data -> password = $request->password;
         if ($request->filled('password')) {
             $data->password = Hash::make($request->password);
         }
 
         $data->save();
-
         toastr()->closeButton()->success('User updated successfully.');
-
-
-        return redirect ('/view_user');
+        return redirect('/view_user');
     }
 
     public function add_tenant(){
-        // Only get users with usertype 'user' who are not already tenants
         $users = User::where('usertype', 'user')
                     ->whereNotIn('id', Tenant::pluck('user_id'))
+                    ->select('id', 'name', 'email') // ✅ FIX: Only select needed columns
                     ->get();
 
-        // Only get houses that are not already assigned to other tenants
-        $houses = House::whereNotIn('id', Tenant::pluck('house_id'))->get();
+        $houses = House::whereNotIn('id', Tenant::pluck('house_id'))
+                      ->select('id', 'title', 'price') // ✅ FIX
+                      ->get();
 
-        $landlords = User::where('usertype', 'landlord')->get();
+        $landlords = User::where('usertype', 'landlord')
+                        ->select('id', 'name') // ✅ FIX
+                        ->get();
 
         return view('admin.tenant.add_tenant', compact('users', 'houses', 'landlords'));
     }
@@ -341,21 +316,18 @@ class AdminController extends Controller
         ]);
 
         try {
-            // Additional check: Verify the selected user is of type 'user'
             $user = User::find($validated['user_id']);
             if (!$user || $user->usertype !== 'user') {
                 toastr()->closeButton()->error('Invalid user selection. Only regular users can be added as tenants.');
                 return redirect()->back()->withInput();
             }
 
-            // Check if user is already a tenant
             $existingTenant = Tenant::where('user_id', $validated['user_id'])->first();
             if ($existingTenant) {
                 toastr()->closeButton()->error('This user is already registered as a tenant.');
                 return redirect()->back()->withInput();
             }
 
-            // Check if the house is already occupied
             $existingHouse = Tenant::where('house_id', $validated['house_id'])->first();
             if ($existingHouse) {
                 toastr()->closeButton()->error('This house is already occupied by another tenant.');
@@ -394,35 +366,37 @@ class AdminController extends Controller
     }
 
     public function view_tenant(){
-        $tenants = Tenant::all();
+        // ✅ FIX: Use pagination and only load needed columns
+        $tenants = Tenant::with([
+            'user:id,name,email,phone',
+            'house:id,title,price'
+        ])->paginate(15);
 
         return view('admin.tenant.view_tenant', compact('tenants'));
     }
 
-
     public function delete_tenant($id){
-        $tenants=Tenant::find($id);
-
+        $tenants = Tenant::find($id);
         $tenants->delete();
 
         toastr()->closeButton()->success('Tenant deleted successfully.');
-
         return redirect()->back();
     }
 
     public function edit_tenant($id)
     {
         $tenants = Tenant::findOrFail($id);
-        $users = User::all();
-        $houses = House::all();
-        $landlords = User::where('usertype', 'landlord')->get();
+        $users = User::select('id', 'name', 'email')->get();
+        $houses = House::select('id', 'title', 'price')->get();
+        $landlords = User::where('usertype', 'landlord')
+                        ->select('id', 'name')
+                        ->get();
 
         return view('admin.tenant.edit_tenant', compact('tenants', 'users', 'houses', 'landlords'));
     }
 
     public function update_tenant(Request $request, $id)
     {
-        // Validate input
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'house_id' => 'required|exists:houses,id',
@@ -440,7 +414,6 @@ class AdminController extends Controller
         try {
             $tenants = Tenant::findOrFail($id);
 
-            // Update tenant details
             $tenants->user_id = $validated['user_id'];
             $tenants->house_id = $validated['house_id'];
             $tenants->landlord_id = $validated['landlord_id'] ?? null;
@@ -456,7 +429,6 @@ class AdminController extends Controller
             $tenants->save();
 
             toastr()->closeButton()->success('Tenant updated successfully.');
-
             return redirect('/view_tenant');
 
         } catch (\Exception $e) {
@@ -465,12 +437,11 @@ class AdminController extends Controller
         }
     }
 
-
     // Landlords
     public function add_landlord(){
-        // Get users who are not already landlords
         $users = User::where('usertype', 'user')
                     ->whereNotIn('id', Landlord::pluck('user_id'))
+                    ->select('id', 'name', 'email') // ✅ FIX
                     ->get();
 
         return view('admin.landlord.add_landlord', compact('users'));
@@ -484,26 +455,22 @@ class AdminController extends Controller
         ]);
 
         try {
-            // Check if user is already a landlord
             $existingLandlord = Landlord::where('user_id', $validated['user_id'])->first();
             if ($existingLandlord) {
                 toastr()->closeButton()->error('This user is already registered as a landlord.');
                 return redirect()->back()->withInput();
             }
 
-            // Create landlord record
             $landlord = new Landlord();
             $landlord->user_id = $validated['user_id'];
             $landlord->national_id = $validated['national_id'] ?? null;
             $landlord->company_name = $validated['company_name'] ?? null;
             $landlord->save();
 
-            // Update user type to landlord
             $user = User::find($validated['user_id']);
             $user->usertype = 'landlord';
             $user->save();
 
-            // Send email notification
             if ($user->email) {
                 $loginUrl = url('/login');
                 Mail::raw("Hello {$user->name},\n\nYou have been registered as a landlord in our system.\nYou can access your account here: {$loginUrl}", function ($message) use ($user) {
@@ -521,28 +488,21 @@ class AdminController extends Controller
         }
     }
 
-    // public function view_landlord(){
-    //     $landlords = Landlord::with('user')->get();
-
-    //     return view('admin.landlord.view_landlord', compact('landlords'));
-    // }
     public function view_landlord(){
-        // Eager load both user and houses relationships
-        $landlords = Landlord::with(['user', 'houses'])->get();
+        // ✅ CRITICAL FIX: Use pagination and withCount instead of loading all houses
+        $landlords = Landlord::with('user:id,name,email,phone')
+                            ->withCount('houses') // Just count, don't load all houses
+                            ->paginate(15);
 
         return view('admin.landlord.view_landlord', compact('landlords'));
     }
+
     public function delete_landlord($id){
         try {
             $landlord = Landlord::findOrFail($id);
-
-            // Get the user before deleting landlord record
             $user = $landlord->user;
-
-            // Delete the landlord record
             $landlord->delete();
 
-            // Optionally revert user type back to 'user'
             if ($user) {
                 $user->usertype = 'user';
                 $user->save();
@@ -559,15 +519,12 @@ class AdminController extends Controller
 
     public function edit_landlord($id)
     {
-        // Fetch landlord with associated user
         $landlord = Landlord::with('user')->findOrFail($id);
-
-        // Get IDs of users who are already landlords, excluding the current landlord
         $excludedUserIds = Landlord::where('id', '!=', $id)->pluck('user_id');
 
-        // Get all users who are not landlords, or who are the current landlord's user
         $users = User::whereNotIn('id', $excludedUserIds)
                     ->orWhere('id', $landlord->user_id)
+                    ->select('id', 'name', 'email')
                     ->get();
 
         return view('admin.landlord.edit_landlord', compact('landlord', 'users'));
@@ -583,7 +540,6 @@ class AdminController extends Controller
         try {
             $landlord = Landlord::findOrFail($id);
 
-            // Check if the new user_id is already used by another landlord
             $existingLandlord = Landlord::where('user_id', $validated['user_id'])
                                     ->where('id', '!=', $id)
                                     ->first();
@@ -592,25 +548,20 @@ class AdminController extends Controller
                 return redirect()->back()->withInput();
             }
 
-            // Store old user_id to revert usertype if changed
             $oldUserId = $landlord->user_id;
 
-            // Update landlord record
             $landlord->user_id = $validated['user_id'];
             $landlord->national_id = $validated['national_id'] ?? null;
             $landlord->company_name = $validated['company_name'] ?? null;
             $landlord->save();
 
-            // If user changed, update usertypes
             if ($oldUserId != $validated['user_id']) {
-                // Revert old user back to 'user'
                 $oldUser = User::find($oldUserId);
                 if ($oldUser) {
                     $oldUser->usertype = 'user';
                     $oldUser->save();
                 }
 
-                // Set new user to 'landlord'
                 $newUser = User::find($validated['user_id']);
                 if ($newUser) {
                     $newUser->usertype = 'landlord';
@@ -626,5 +577,4 @@ class AdminController extends Controller
             return redirect()->back()->withInput();
         }
     }
-
 }
