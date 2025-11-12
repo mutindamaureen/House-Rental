@@ -213,11 +213,6 @@
             </div>
         </section>
 
-        <footer class="footer mt-4">
-            <div class="container-fluid text-center">
-                <p class="no-margin-bottom mb-0">{{ date('Y') }} &copy; Property Management System</p>
-            </div>
-        </footer>
     </div>
 </div>
 

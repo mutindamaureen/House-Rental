@@ -52,4 +52,27 @@ class User extends Authenticatable
         return $this->hasOne(Landlord::class);
     }
 
+    /**
+     * Messages sent by this user
+     */
+    public function sentMessages()
+    {
+        return $this->hasMany(Chatmasseges::class, 'sender_id');
+    }
+
+    /**
+     * Messages received by this user
+     */
+    public function receivedMessages()
+    {
+        return $this->hasMany(Chatmasseges::class, 'receiver_id');
+    }
+
+    /**
+     * Get unread message count for this user
+     */
+    public function unreadMessagesCount()
+    {
+        return $this->receivedMessages()->where('is_read', false)->count();
+    }
 }

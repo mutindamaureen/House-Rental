@@ -30,9 +30,9 @@
             </div>
             <div class="card-body text-center d-flex flex-column justify-content-between">
                 <h6 class="card-title mb-2">{{ $houses->title }}</h6>
-                <p class="card-text text-primary fw-bold mb-3">Ksh{{ $houses->price }}</p>
-                <p class="card-text text-primary fw-bold mb-3">{{ $houses->location }}</p>
-                {{-- <p class="card-text text-primary fw-bold mb-3">{{ $houses->status }}</p> --}}
+                <p class="card-text  fw-bold mb-3">Ksh{{ $houses->price }}</p>
+                <p class="card-text  fw-bold mb-3"><span>Location: </span>{{ $houses->location }}</p>
+                {{-- <p class="card-text  fw-bold mb-3"><span>Quantity: </span>{{ $houses->quantity }}</p> --}}
 
                 {{-- <a href="{{ url('house_details') }}" class="btn btn-sm btn-outline-primary mt-auto">View</a> --}}
                 <a href="{{ route('house.details', $houses->id) }}" class="btn btn-sm btn-outline-primary mt-auto">View</a>
