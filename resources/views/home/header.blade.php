@@ -72,11 +72,24 @@
                     </li>
 
                     <!-- Optional shopping bag -->
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a href="#" class="nav-link text-dark">
                             <i class="fas fa-shopping-bag"></i>
                         </a>
+                    </li> --}}
+                    @auth
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url('/chat') }}">
+                            <i class="fa fa-comments"></i> My Chats
+                            @php
+                                $unreadCount = Auth::user()->unreadMessagesCount();
+                            @endphp
+                            @if($unreadCount > 0)
+                                <span class="badge bg-danger rounded-pill">{{ $unreadCount }}</span>
+                            @endif
+                        </a>
                     </li>
+                    @endauth
 
                     <!-- Logout -->
                     <li class="nav-item">
@@ -90,6 +103,7 @@
                     </li>
                 @endguest
             </ul>
+
         </div>
     </nav>
 </header>

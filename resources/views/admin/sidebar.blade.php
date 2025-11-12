@@ -1,3 +1,4 @@
+
 <!-- Sidebar Navigation-->
 <nav id="sidebar">
   <!-- Sidebar Header-->
@@ -83,7 +84,34 @@
       <ul id="contractDropdown" class="collapse list-unstyled">
         <li><a href="{{ url('add_contract') }}">Add Contract</a></li>
         <li><a href="{{ url('view_contract') }}">View Contracts</a></li>
+        <li><a href="{{ url('terminated_contracts') }}">Terminated Contracts</a></li>
       </ul>
     </li>
+
+    <li>
+      <a href="#paymentsDropdown" aria-expanded="false" data-toggle="collapse">
+        <i class="icon-wrench"></i> Payments
+      </a>
+      <ul id="paymentsDropdown" class="collapse list-unstyled">
+        <li><a href="{{ route('admin.add_payment') }}">Add Payments</a></li>
+        <li><a href="{{ route('admin.view_payments') }}">View Payments</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#invoiceDropdown" aria-expanded="false" data-toggle="collapse">
+        <i class="icon-wrench"></i> Invoice
+      </a>
+      <ul id="invoiceDropdown" class="collapse list-unstyled">
+        <li><a href="{{ route('invoices.create') }}">Add Invoice</a></li>
+        <li><a href="{{ route('invoices.index') }}">View Invoice</a></li>
+      </ul>
+    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url('/admin/chat') }}">
+                                <i class="fa fa-comments"></i>
+                                <span>Chat Management</span>
+                            </a>
+                        </li>
+
   </ul>
 </nav>

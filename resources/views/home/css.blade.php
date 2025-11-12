@@ -8,6 +8,8 @@
   <meta name="description" content="" />
   <meta name="author" content="" />
   <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <title>
     Giftos
@@ -74,6 +76,31 @@
 
     .user_option a span {
     margin-left: 5px;
+    }
+    .chat-notification {
+        position: relative;
+        display: inline-block;
+        margin: 0 15px;
+    }
+    .chat-notification .badge {
+        position: absolute;
+        top: -8px;
+        right: -10px;
+        padding: 3px 6px;
+        border-radius: 10px;
+        background: #dc3545;
+        color: white;
+        font-size: 11px;
+        font-weight: bold;
+    }
+    .chat-icon {
+        font-size: 20px;
+        color: #333;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+    .chat-icon:hover {
+        color: #007bff;
     }
 
   </style>
